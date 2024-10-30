@@ -1,6 +1,6 @@
 # Asset_UsdPipeline_Test
 ![image](screenshot/Test.png)
-# The script contains two main class
+## The script contains two main class
 - FilePorcessor:  Traversal  the Asset folder, orgnizing the relationships between files using a hashmap, checking for missing files. and print missing file information.
 
 - USDGenertor: Create a new USD file, where each Pirm includes mesh data and materials. The material is nameed is named based on the prefix and automatically links to the corresponding texture paths. 
