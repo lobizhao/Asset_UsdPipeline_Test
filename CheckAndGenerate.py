@@ -120,7 +120,7 @@ def generate_usd_from_folder(folder_path):
         stage.GetRootLayer().Save()
         print(f"USD file '{output_file}' created.")
 
-
+# input folder path
 folder_path = input("Enter the file path: ")
 #folder_path = r"D:\Asset_Pipeline_Test\Assets"
 generate_usd_from_folder(folder_path)
