@@ -6,6 +6,11 @@ class USDGenerator:
         self.stage = stage
         self.prim_path = f"/{prim_name}"
         self.root_prim = stage.DefinePrim(self.prim_path, "Xform")
+
+        # stage.SetDefaultPrim(self.root_prim)
+        # xformable = UsdGeom.Xformable(self.root_prim)
+        # self.transform_op = xformable.AddTransformOp()
+
         self.looks_scope = stage.DefinePrim(f"{self.prim_path}/Looks", "Scope")
 
     def create_material(self, material_name):
@@ -38,7 +43,6 @@ class USDGenerator:
 
     def setup_material_with_textures(self, material_name,diffuse_path, mr_path, normal_path):
         shader = self.create_material(material_name)
-        # 创建纹理着色器
         diffuse_texture = self.create_texture_shader(diffuse_path, "Diffuse")
         mr_texture = self.create_texture_shader(mr_path, "MetallicRoughness")
         normal_texture = self.create_texture_shader(normal_path, "Normal")
@@ -55,8 +59,13 @@ class USDGenerator:
         mesh = self.stage.DefinePrim(f"{self.prim_path}/Mesh", "Xform")
         mesh.GetReferences().AddReference(model_usd_path)
 
-        UsdShade.MaterialBindingAPI(mesh).Bind(self.material)
+        #fixed left hand resources to right hand
+        xformable = UsdGeom.Xformable(mesh)
+        xformable.AddRotateXYZOp().Set(Gf.Vec3f(-90.0,0.0,0.0))
+        #too small size, camera near clip
+        xformable.AddScaleOp().Set(Gf.Vec3f(1000.0, 1000.0, 1000.0))
 
+        UsdShade.MaterialBindingAPI(mesh).Bind(self.material)
 
 class FileProcessor:
     required_files = ["_base.usd", "_texture_diff.png", "_texture_MR.png", "_texture_normal.png"]
@@ -107,7 +116,6 @@ def generate_usd_from_folder(folder_path):
     for prefix, file_paths in valid_prefixes.items():
         output_file = os.path.join(folder_path, f"{prefix}_MatGeo.usd")
         stage = Usd.Stage.CreateNew(output_file)
-
         usd_generator = USDGenerator(stage, prim_name=prefix)
         usd_generator.setup_material_with_textures(
             material_name=prefix,
@@ -118,7 +126,9 @@ def generate_usd_from_folder(folder_path):
         usd_generator.add_mesh_with_material_binding(model_usd_path=file_paths["_base.usd"])
 
         stage.GetRootLayer().Save()
+        #print(stage.ExportToString())
         print(f"USD file '{output_file}' created.")
+
 
 # input folder path
 folder_path = input("Enter the file path: ")
