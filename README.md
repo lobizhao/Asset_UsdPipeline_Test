@@ -1,12 +1,25 @@
 # Asset_UsdPipeline_Test
 ![image](screenshot/Test.png)
-## The script contains two main class
+
+### Submit content
+   - Test script language: Python, PyCharm.
+     - CheckAndGenerate.py
+   - Script output content: Usd, Omniverse Code.
+     - stage(file_name):
+       - Render
+         - Mesh
+       - Looks
+         - Material
+   - Demo videos: google drive link: [Link text](https://drive.google.com/drive/folders/1sGSUAG_GUu3hxB58fMpDA4VUQb5-mPeM?usp=drive_link)
+       - Basic process: basicTest_CreateUsd.mp4
+       - File validation check: missing_Report.mp4
+### script
 - FilePorcessor:  Traversal  the Asset folder, orgnizing the relationships between files using a hashmap, checking for missing files. and print missing file information.
 
 - USDGenertor: Create a new USD file, where each Pirm includes mesh data and materials. The material is nameed is named based on the prefix and automatically links to the corresponding texture paths. 
 
 
-## Workflow
+### Workflow
 1. Input the Asset folder path.
 
 2. Traversal the files in the folder to extract each file's prefix. Store files with the same prefix in a hashmap, where the prefix string is the key and all files sharing that prefix are stored as values.
@@ -30,11 +43,11 @@
 
 4. Iterate over the valid files to create the stage, prim, and material for each prefix.
 
-## Standalone Missing File Check Feature
+### Standalone Missing File Check Feature
 Before generating new USD files, you can use the file validation feature alone: 
 - Call the validate_files method in the FileProcessor class to detect and print all missing asset files. This can help ensure file completeness before actual USD file generation, preventing potential errors.
 
-## Current Issues
+### Current Issues
 - Coordinate System Mismatch: The mesh resource is exported from a left-handed coordinate system tool. Therefore, an additional rotation is required to correctly align the asset in Omniverse.
 - Modified model rotation and scale (for testing only), corrected camera near clip and left-hand coordinate system.
 ![image](screenshot/RotSca.png)
