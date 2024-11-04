@@ -36,6 +36,8 @@ Before generating new USD files, you can use the file validation feature alone:
 
 ## Current Issues
 - Coordinate System Mismatch: The mesh resource is exported from a left-handed coordinate system tool. Therefore, an additional rotation is required to correctly align the asset in Omniverse.
-![image](screenshot/left_hand.png)
+- Modified model rotation and scale (for testing only), corrected camera near clip and left-hand coordinate system.
+![image](screenshot/RotSca.png)
+
 
 - Material File Loading Warning: When opening the material file for the first time in “Open in MDL Material Graph,” a console error appears: Traceback (most recent call last): .... However, after a few seconds, the texture node links open normally without any further modification.
