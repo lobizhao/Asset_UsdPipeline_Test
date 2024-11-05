@@ -1,6 +1,5 @@
 import os
 
-
 class FileProcessor:
     #list all require files, easy to update texture type or mesh type
     required_files = {

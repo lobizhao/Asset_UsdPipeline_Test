@@ -1,7 +1,6 @@
 import os
 from pxr import Usd, UsdShade, Sdf, UsdGeom, Gf
 
-
 # reference : https://docs.omniverse.nvidia.com/dev-guide/latest/programmer_ref/usd/materials/create-mdl-material.html
 class USDGenerator:
     def __init__(self, stage, prim_name="Root"):
@@ -9,7 +8,7 @@ class USDGenerator:
         self.prim_path = f"/{prim_name}"
         self.root_prim = stage.DefinePrim(self.prim_path, "Xform")
         self.looks_scope = stage.DefinePrim(f"{self.prim_path}/Looks", "Scope")
-
+        stage.SetDefaultPrim(self.root_prim)
     def create_material(self, material_name):
         self.material_path = f"{self.prim_path}/Looks/{material_name}"
         self.material = UsdShade.Material.Define(self.stage, self.material_path)
@@ -17,7 +16,6 @@ class USDGenerator:
         shader = UsdShade.Shader.Define(self.stage, shader_path)
         shader.CreateIdAttr("UsdPreviewSurface")
         return shader
-
     def create_texture_shader(self, texture_path, shader_name, default_color=Gf.Vec3f(1.0, 1.0, 1.0)):
         texture_shader = UsdShade.Shader.Define(self.stage, f"{self.material_path}/{shader_name}_Texture")
         texture_shader.CreateIdAttr("UsdUVTexture")
@@ -36,7 +34,6 @@ class USDGenerator:
 
     def setup_material_with_textures(self, material_name, diffuse_path, mr_path, normal_path):
         shader = self.create_material(material_name)
-        # 创建纹理着色器
         diffuse_texture = self.create_texture_shader(diffuse_path, "Diffuse")
         mr_texture = self.create_texture_shader(mr_path, "MetallicRoughness")
         normal_texture = self.create_texture_shader(normal_path, "Normal")
@@ -53,13 +50,12 @@ class USDGenerator:
         # fixed left hand resources to right hand
         xformable = UsdGeom.Xformable(mesh)
         xformable.AddRotateXYZOp().Set(Gf.Vec3f(-90.0, 0.0, 0.0))
-        xformable.AddScaleOp().Set(Gf.Vec3f(1000.0, 1000.0, 1000.0))
+        xformable.AddScaleOp().Set(Gf.Vec3f(100.0, 100.0, 100.0))
         UsdShade.MaterialBindingAPI(mesh).Bind(self.material)
 
 
 class FileProcessor:
     #require files: mesh, diffuse, metatlic and roughness, normal
-
     required_files = ["_base.usd",
                       "_texture_diff.png",
                       "_texture_MR.png",
@@ -67,7 +63,7 @@ class FileProcessor:
     def __init__(self, folder_path):
         self.folder_path = folder_path
 
-    def get_prefix_files(self):
+    def get_prefix_files(self)->dict:
         files_dict = {}
         for file_name in os.listdir(self.folder_path):
             full_path = os.path.join(self.folder_path, file_name)
@@ -78,13 +74,13 @@ class FileProcessor:
                 files_dict[prefix].append(full_path)
         return files_dict
 
-    def validate_files(self, files_dict):
+    def validate_files(self, files_dict)->dict:
         valid_prefixes = {}
         for prefix, files in files_dict.items():
             base_usd = next((f for f in files if f.endswith("_base.usd")), None)
             if not base_usd:
                 print(f"Prefix '{prefix}' is missing the following texture files:")
-                print(f"-{prefix}_base.usd")
+                print(f" -{prefix}_base.usd")
                 continue
             file_paths = {
                 "_base.usd": base_usd,
@@ -96,7 +92,7 @@ class FileProcessor:
             if missing_textures:
                 print(f"Prefix '{prefix}' is missing the following texture files:")
                 for missing in missing_textures:
-                    print(f" -{missing}")
+                    print(f" -{prefix}{missing}")
             valid_prefixes[prefix] = file_paths
         return valid_prefixes
 
@@ -112,14 +108,11 @@ def generate_usd_from_folder(folder_path):
             print(f"{key:<20}: {value}")
         print()
 
-
     for prefix, file_paths in valid_prefixes.items():
         output_file = os.path.join(folder_path, f"{prefix}_final.usd")
-
         # create empty stage
         stage = Usd.Stage.CreateNew(output_file)
         usd_generator = USDGenerator(stage, prim_name=prefix)
-
         usd_generator.setup_material_with_textures(
             material_name=prefix,
             diffuse_path=file_paths.get("_texture_diff.png"),
@@ -127,8 +120,8 @@ def generate_usd_from_folder(folder_path):
             normal_path=file_paths.get("_texture_normal.png")
         )
         usd_generator.add_mesh_with_material_binding(model_usd_path=file_paths["_base.usd"])
-
         stage.GetRootLayer().Save()
+
         # print(stage.ExportToString())
         #print(f"USD file '{output_file}' created.")
 

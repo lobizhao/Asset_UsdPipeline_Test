@@ -39,6 +39,10 @@
 3. Traversal the hashmap to check for missing required files: 
     - If the .usd file is missing and only texture files are found, print the missing file information and skip this set of files.
     - If the .usd file is present but some texture files are missing, print the missing texture information and proceed to create the material. Missing textures will have empty paths and will be filled with a default color vec3(1.0, 1.0, 1.0).
+    
+      - ![image](screenshot/missingReport.png)
+      - ![image](screenshot/relationReport.png)
+      
     - Create a new hashmap excluding entries without .usd files, returning only the valid files for USD generation.
 
 4. Iterate over the valid files to create the stage, prim, and material for each prefix.
